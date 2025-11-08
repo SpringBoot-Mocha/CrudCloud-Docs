@@ -22,10 +22,10 @@ const sidebars = {
       label: '01. Guia de Inicio',
       collapsed: false,
       items: [
-        '01-guia-inicio/requisitos',
-        '01-guia-inicio/instalacion',
-        '01-guia-inicio/configuracion',
-        '01-guia-inicio/primer-run',
+        'guia-inicio/requisitos',
+        'guia-inicio/instalacion',
+        'guia-inicio/configuracion',
+        'guia-inicio/primer-run',
       ],
     },
     {
@@ -33,9 +33,9 @@ const sidebars = {
       label: '02. Arquitectura',
       collapsed: false,
       items: [
-        '02-arquitectura/resumen',
-        '02-arquitectura/estructura-proyecto',
-        '02-arquitectura/dependencias',
+        'arquitectura/resumen',
+        'arquitectura/estructura-proyecto',
+        'arquitectura/dependencias',
       ],
     },
     {
@@ -43,9 +43,9 @@ const sidebars = {
       label: '03. Desarrollo',
       collapsed: false,
       items: [
-        '03-desarrollo/guia-desarrollo',
-        '03-desarrollo/convenciones',
-        '03-desarrollo/testing',
+        'desarrollo/guia-desarrollo',
+        'desarrollo/convenciones',
+        'desarrollo/testing',
       ],
     },
     {
@@ -53,21 +53,11 @@ const sidebars = {
       label: '04. API Reference',
       collapsed: false,
       items: [
-        '04-api/autenticacion',
-        '04-api/usuarios',
-        '04-api/productos',
-        '04-api/ordenes',
-        '04-api/pagos',
-      ],
-    },
-    {
-      type: 'category',
-      label: '05. Deployment',
-      collapsed: false,
-      items: [
-        '05-deployment/produccion',
-        '05-deployment/docker',
-        '05-deployment/variables-entorno',
+        'api/autenticacion',
+        'api/usuarios',
+        'api/productos',
+        'api/ordenes',
+        'api/pagos',
       ],
     },
   ],
