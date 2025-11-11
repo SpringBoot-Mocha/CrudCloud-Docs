@@ -462,6 +462,6 @@ taskkill /PID <PID> /F
 
 ## Proximos Pasos
 
-- Lee las [Convenciones de Codigo](/docs/03-desarrollo/convenciones)
-- Aprende sobre [Testing](/docs/03-desarrollo/testing)
-- Consulta la [API Reference](/docs/04-api/autenticacion)
+- Lee las [Convenciones de Codigo](/docs/desarrollo/convenciones)
+- Aprende sobre [Testing](/docs/desarrollo/testing)
+- Consulta la [API Reference](/docs/api/autenticacion)

@@ -306,5 +306,5 @@ max_line_length = 120
 
 ## Proximos Pasos
 
-- Aprende sobre [Testing](/docs/03-desarrollo/testing)
-- Consulta la [API Reference](/docs/04-api/autenticacion)
+- Aprende sobre [Testing](/docs/desarrollo/testing)
+- Consulta la [API Reference](/docs/api/autenticacion)

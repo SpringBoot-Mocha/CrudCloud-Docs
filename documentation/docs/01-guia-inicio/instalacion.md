@@ -409,7 +409,7 @@ curl http://localhost:8080/api/actuator/health
 
 ## Proximos Pasos
 
-Ahora que has instalado la aplicacion, continua con la [Configuracion](/docs/01-guia-inicio/configuracion) para personalizar el proyecto segun tus necesidades.
+Ahora que has instalado la aplicacion, continua con la [Configuracion](/docs/guia-inicio/configuracion) para personalizar el proyecto segun tus necesidades.
 
 ## Troubleshooting
 
@@ -444,4 +444,4 @@ rm -rf target/
 ./mvnw clean install -U
 ```
 
-Si sigues teniendo problemas, consulta la seccion de [Troubleshooting](/docs/03-desarrollo/troubleshooting) o abre un issue en GitHub.
+Si sigues teniendo problemas, abre un issue en GitHub.

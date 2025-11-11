@@ -5,105 +5,62 @@ title: Usuarios
 
 # API de Usuarios
 
-CRUD completo para gestion de usuarios.
+Endpoints para gestión de usuarios del sistema CrudCloud.
 
-## Endpoints
+## Crear Usuario
 
-### GET /api/users
+### POST `/api/v1/auth/register`
 
-Lista todos los usuarios (requiere rol ADMIN).
+Registra un nuevo usuario en el sistema.
 
-**Response (200 OK):**
+**Request Body:**
 ```json
-[
-  {
-    "id": 1,
-    "username": "johndoe",
-    "email": "john@example.com",
-    "firstName": "John",
-    "lastName": "Doe",
-    "active": true,
-    "roles": ["ROLE_USER"]
-  }
-]
+{
+  "email": "user@example.com",
+  "password": "securePassword123",
+  "name": "John Doe",
+  "isOrganization": false
+}
 ```
 
-### GET /api/users/{id}
-
-Obtiene un usuario por ID.
-
-**Response (200 OK):**
+**Response (201 Created):**
 ```json
 {
   "id": 1,
-  "username": "johndoe",
-  "email": "john@example.com",
-  "firstName": "John",
-  "lastName": "Doe",
-  "active": true,
-  "createdAt": "2025-01-07T10:00:00",
-  "roles": ["ROLE_USER"]
+  "email": "user@example.com",
+  "name": "John Doe",
+  "isOrganization": false,
+  "createdAt": "2025-11-10T10:00:00Z"
 }
 ```
 
 **Errores:**
-- `404 Not Found`: Usuario no existe
+- `400 Bad Request`: Email ya existe o validación fallida
+- `500 Internal Server Error`: Error del servidor
 
-### GET /api/users/me
+## Obtener Usuario
 
-Obtiene el perfil del usuario autenticado.
+### GET `/api/v1/users/{userId}`
 
-**Headers:**
-```
-Authorization: Bearer <token>
-```
+Obtiene información de un usuario específico.
 
 **Response (200 OK):**
 ```json
 {
   "id": 1,
-  "username": "johndoe",
-  "email": "john@example.com",
-  "firstName": "John",
-  "lastName": "Doe",
-  "roles": ["ROLE_USER"]
+  "email": "user@example.com",
+  "name": "John Doe",
+  "isOrganization": false,
+  "createdAt": "2025-11-10T10:00:00Z"
 }
 ```
 
-### PUT /api/users/{id}
+**Errores:**
+- `404 Not Found`: Usuario no encontrado
+- `401 Unauthorized`: Token JWT inválido
 
-Actualiza un usuario.
+## Status
 
-**Request:**
-```json
-{
-  "firstName": "John Updated",
-  "lastName": "Doe Updated",
-  "email": "newemail@example.com"
-}
-```
+**Estado actual:** Pendiente de implementación (Fase 4 - Controllers)
 
-**Response (200 OK):**
-```json
-{
-  "id": 1,
-  "username": "johndoe",
-  "email": "newemail@example.com",
-  "firstName": "John Updated",
-  "lastName": "Doe Updated"
-}
-```
-
-### DELETE /api/users/{id}
-
-Elimina un usuario (requiere rol ADMIN).
-
-**Response (204 No Content)**
-
-## Autorizacion
-
-- `GET /users` - ROLE_ADMIN
-- `GET /users/{id}` - ROLE_ADMIN o propio usuario
-- `GET /users/me` - Usuario autenticado
-- `PUT /users/{id}` - ROLE_ADMIN o propio usuario
-- `DELETE /users/{id}` - ROLE_ADMIN
+Los servicios están implementados pero los controllers REST aún no.

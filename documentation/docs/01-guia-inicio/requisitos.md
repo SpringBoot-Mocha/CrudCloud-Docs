@@ -271,4 +271,4 @@ echo "=== Validacion completada ==="
 
 ## Proximos Pasos
 
-Una vez que hayas verificado todos los requisitos, procede a la [Instalacion](/docs/01-guia-inicio/instalacion).
+Una vez que hayas verificado todos los requisitos, procede a la [Instalacion](/docs/guia-inicio/instalacion).

@@ -5,197 +5,82 @@ title: Estructura del Proyecto
 
 # Estructura del Proyecto
 
-Esta pagina documenta la organizacion de carpetas y archivos del proyecto CrudCloud Backend.
+Esta página documenta la organización de carpetas y archivos del proyecto CrudCloud Backend.
 
 ## Estructura General
 
 ```
-crudcloud-backend/
-├── src/
-│   ├── main/
-│   │   ├── java/
-│   │   │   └── com/
-│   │   │       └── crudcloud/
-│   │   │           └── backend/
-│   │   │               ├── config/
-│   │   │               ├── controller/
-│   │   │               ├── dto/
-│   │   │               ├── entity/
-│   │   │               ├── exception/
-│   │   │               ├── repository/
-│   │   │               ├── security/
-│   │   │               ├── service/
-│   │   │               ├── util/
-│   │   │               └── CrudCloudBackendApplication.java
-│   │   └── resources/
-│   │       ├── application.properties
-│   │       ├── application-dev.properties
-│   │       ├── application-prod.properties
-│   │       ├── application-test.properties
-│   │       ├── data.sql
-│   │       ├── schema.sql
-│   │       └── static/
-│   └── test/
-│       └── java/
-│           └── com/
-│               └── crudcloud/
-│                   └── backend/
-│                       ├── controller/
-│                       ├── service/
-│                       ├── repository/
-│                       └── integration/
-├── target/
-├── .gitignore
-├── .env
-├── docker-compose.yml
-├── Dockerfile
-├── mvnw
-├── mvnw.cmd
-├── pom.xml
+Crudcloud_Backend/
+├── CrudCloud/                          # Proyecto Spring Boot principal
+│   ├── src/
+│   │   ├── main/
+│   │   │   ├── java/
+│   │   │   │   └── com/
+│   │   │   │       └── crudzaso/
+│   │   │   │           └── CrudCloud/
+│   │   │   │               ├── domain/
+│   │   │   │               │   ├── entity/      # 7 entidades JPA
+│   │   │   │               │   └── enums/       # 2 enums
+│   │   │   │               ├── repository/      # 7 repositorios
+│   │   │   │               ├── service/         # Interfaces + impl
+│   │   │   │               │   └── impl/        # 6 servicios
+│   │   │   │               ├── dto/
+│   │   │   │               │   ├── request/     # 7 request DTOs
+│   │   │   │               │   └── response/    # 7 response DTOs
+│   │   │   │               ├── exception/       # Excepciones custom
+│   │   │   │               ├── controller/      # (Pendiente Fase 4)
+│   │   │   │               ├── config/          # (Pendiente Fase 4)
+│   │   │   │               └── CrudCloudApplication.java
+│   │   │   └── resources/
+│   │   │       ├── application.properties
+│   │   │       └── application-prod.properties
+│   │   └── test/
+│   │       └── java/
+│   ├── pom.xml                         # Maven dependencies
+│   └── target/
+├── md/                                  # Documentación markdown
+│   ├── GUIA_PROYECTO.md
+│   ├── REFERENCIA_RAPIDA.md
+│   ├── MODELO_BASE_DATOS.md
+│   ├── ROADMAP.md
+│   ├── SCHEMA_CRUDCLOUD_POSTGRESQL.sql
+│   └── SCHEMA_CRUDCLOUD_MYSQL.sql
+├── CrudCloud-Docs/                     # Docusaurus (esta documentación)
+│   └── documentation/
+│       ├── docs/
+│       ├── src/
+│       └── docusaurus.config.js
 └── README.md
 ```
 
 ## Paquetes Principales
 
-### config/
+### domain/entity/ (7 Entidades JPA)
 
-**Proposito**: Clases de configuracion de Spring
-
-```
-config/
-├── AppConfig.java              # Configuracion general
-├── SecurityConfig.java         # Configuracion de seguridad
-├── WebConfig.java              # Configuracion Web (CORS, etc.)
-├── JpaConfig.java              # Configuracion JPA/Hibernate
-├── SwaggerConfig.java          # Configuracion Swagger/OpenAPI
-└── MercadoPagoConfig.java      # Configuracion Mercado Pago
-```
-
-**Ejemplo**:
-```java
-@Configuration
-public class AppConfig {
-
-    @Bean
-    public ModelMapper modelMapper() {
-        return new ModelMapper();
-    }
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-}
-```
-
-### controller/
-
-**Proposito**: Controladores REST (endpoints HTTP)
-
-```
-controller/
-├── AuthController.java         # /api/auth/*
-├── UserController.java         # /api/users/*
-├── ProductController.java      # /api/products/*
-├── OrderController.java        # /api/orders/*
-├── PaymentController.java      # /api/payments/*
-└── HealthController.java       # /api/health
-```
-
-**Estructura tipica**:
-```java
-@RestController
-@RequestMapping("/api/users")
-@RequiredArgsConstructor
-public class UserController {
-
-    private final UserService userService;
-
-    @GetMapping("/{id}")
-    public ResponseEntity<UserDTO> getUser(@PathVariable Long id) {
-        // ...
-    }
-
-    @PostMapping
-    public ResponseEntity<UserDTO> createUser(@Valid @RequestBody UserCreateDTO dto) {
-        // ...
-    }
-}
-```
-
-### dto/
-
-**Proposito**: Data Transfer Objects
-
-```
-dto/
-├── request/
-│   ├── UserCreateDTO.java
-│   ├── UserUpdateDTO.java
-│   ├── LoginRequestDTO.java
-│   ├── RegisterRequestDTO.java
-│   ├── ProductCreateDTO.java
-│   └── OrderCreateDTO.java
-├── response/
-│   ├── UserDTO.java
-│   ├── ProductDTO.java
-│   ├── OrderDTO.java
-│   ├── AuthResponseDTO.java
-│   └── ApiResponseDTO.java
-└── mapper/
-    ├── UserMapper.java
-    ├── ProductMapper.java
-    └── OrderMapper.java
-```
-
-**Ejemplo**:
-```java
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-public class UserCreateDTO {
-
-    @NotBlank(message = "Email es requerido")
-    @Email(message = "Email debe ser valido")
-    private String email;
-
-    @NotBlank(message = "Password es requerido")
-    @Size(min = 8, max = 100)
-    private String password;
-
-    @NotBlank
-    private String firstName;
-
-    @NotBlank
-    private String lastName;
-}
-```
-
-### entity/
-
-**Proposito**: Entidades JPA (modelos de dominio)
+**Propósito**: Modelos de dominio con anotaciones JPA
 
 ```
 entity/
-├── User.java
-├── Role.java
-├── Product.java
-├── Category.java
-├── Order.java
-├── OrderItem.java
-├── Payment.java
-└── BaseEntity.java             # Clase base con campos comunes
+├── User.java                    # Usuarios y organizaciones
+├── Plan.java                    # FREE, STANDARD, PREMIUM
+├── Subscription.java            # Relación User-Plan
+├── DatabaseEngine.java          # MySQL, PostgreSQL, MongoDB, etc.
+├── DatabaseInstance.java        # Instancias de BD en Docker
+├── Credential.java              # Credenciales encriptadas
+└── Transaction.java             # Pagos con Mercado Pago
 ```
 
-**Ejemplo**:
+**Ejemplo - User.java**:
 ```java
+package com.crudzaso.CrudCloud.domain.entity;
+
 @Entity
 @Table(name = "users")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(callSuper = true)
-public class User extends BaseEntity {
+@Builder
+public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -205,187 +90,186 @@ public class User extends BaseEntity {
     private String email;
 
     @Column(nullable = false)
-    private String password;
-
-    private String firstName;
-    private String lastName;
-
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-        name = "user_roles",
-        joinColumns = @JoinColumn(name = "user_id"),
-        inverseJoinColumns = @JoinColumn(name = "role_id")
-    )
-    private Set<Role> roles = new HashSet<>();
+    private String password;  // BCrypt hash
 
     @Column(nullable = false)
-    private Boolean active = true;
+    private String name;
+
+    @Column(nullable = false)
+    private Boolean isOrganization = false;
+
+    @Column(updatable = false)
+    private LocalDateTime createdAt;
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+    }
+
+    // Relaciones
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<Subscription> subscriptions = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<DatabaseInstance> instances = new ArrayList<>();
 }
 ```
 
-### exception/
-
-**Proposito**: Excepciones personalizadas y manejo global
-
-```
-exception/
-├── GlobalExceptionHandler.java  # @RestControllerAdvice
-├── ResourceNotFoundException.java
-├── BusinessException.java
-├── UnauthorizedException.java
-├── BadRequestException.java
-└── ErrorResponse.java           # Estructura de error estandar
-```
-
-**Ejemplo**:
+**Ejemplo - DatabaseInstance.java**:
 ```java
-@RestControllerAdvice
-public class GlobalExceptionHandler {
+package com.crudzaso.CrudCloud.domain.entity;
 
-    @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleNotFound(
-        ResourceNotFoundException ex
-    ) {
-        ErrorResponse error = new ErrorResponse(
-            HttpStatus.NOT_FOUND.value(),
-            ex.getMessage(),
-            LocalDateTime.now()
-        );
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
-    }
+@Entity
+@Table(name = "database_instances")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class DatabaseInstance {
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleValidation(
-        MethodArgumentNotValidException ex
-    ) {
-        Map<String, String> errors = new HashMap<>();
-        ex.getBindingResult().getFieldErrors()
-            .forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-        ErrorResponse response = new ErrorResponse(
-            HttpStatus.BAD_REQUEST.value(),
-            "Errores de validacion",
-            errors,
-            LocalDateTime.now()
-        );
-        return ResponseEntity.badRequest().body(response);
-    }
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "engine_id", nullable = false)
+    private DatabaseEngine engine;
+
+    @Column(nullable = false)
+    private String instanceName;
+
+    @Column(unique = true, nullable = false)
+    private String containerName;  // crudcloud_mysql_uuid
+
+    @Column(nullable = false)
+    private Integer port;  // Puerto host asignado
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private InstanceStatus status;
+
+    private Double cpuUsage;     // % CPU (Docker Stats API)
+    private Double memoryUsage;  // MB memoria (Docker Stats API)
+
+    @Column(updatable = false)
+    private LocalDateTime createdAt;
+
+    // Relación 1:1 con Credential
+    @OneToOne(mappedBy = "instance", cascade = CascadeType.ALL)
+    private Credential credential;
 }
 ```
 
-### repository/
+### domain/enums/ (2 Enums)
 
-**Proposito**: Repositorios JPA para acceso a datos
+**Propósito**: Enumeraciones del sistema
+
+```
+enums/
+├── InstanceStatus.java         # CREATING, RUNNING, SUSPENDED, DELETED
+└── TransactionStatus.java      # PENDING, APPROVED, FAILED
+```
+
+**Ejemplo - InstanceStatus.java**:
+```java
+package com.crudzaso.CrudCloud.domain.enums;
+
+public enum InstanceStatus {
+    CREATING,   // Contenedor Docker en proceso de creación
+    RUNNING,    // Contenedor activo y funcional
+    SUSPENDED,  // Contenedor detenido temporalmente
+    DELETED     // Contenedor eliminado (soft delete)
+}
+```
+
+### repository/ (7 Repositorios)
+
+**Propósito**: Acceso a datos con Spring Data JPA
 
 ```
 repository/
 ├── UserRepository.java
-├── RoleRepository.java
-├── ProductRepository.java
-├── CategoryRepository.java
-├── OrderRepository.java
-├── OrderItemRepository.java
-└── PaymentRepository.java
+├── PlanRepository.java
+├── SubscriptionRepository.java
+├── DatabaseEngineRepository.java
+├── DatabaseInstanceRepository.java
+├── CredentialRepository.java
+└── TransactionRepository.java
 ```
 
-**Ejemplo**:
+**Ejemplo - DatabaseInstanceRepository.java**:
 ```java
+package com.crudzaso.CrudCloud.repository;
+
 @Repository
-public interface UserRepository extends JpaRepository<User, Long> {
+public interface DatabaseInstanceRepository extends JpaRepository<DatabaseInstance, Long> {
 
-    Optional<User> findByEmail(String email);
+    List<DatabaseInstance> findByUserId(Long userId);
 
-    boolean existsByEmail(String email);
+    List<DatabaseInstance> findByUserIdAndStatus(Long userId, InstanceStatus status);
 
-    List<User> findByActiveTrue();
+    Optional<DatabaseInstance> findByContainerName(String containerName);
 
-    @Query("SELECT u FROM User u JOIN u.roles r WHERE r.name = :roleName")
-    List<User> findByRoleName(@Param("roleName") String roleName);
+    boolean existsByContainerName(String containerName);
+
+    @Query("SELECT COUNT(di) FROM DatabaseInstance di " +
+           "WHERE di.user.id = :userId AND di.status != 'DELETED'")
+    long countActiveInstancesByUserId(@Param("userId") Long userId);
+
+    @Query("SELECT di FROM DatabaseInstance di " +
+           "WHERE di.status = 'RUNNING' ORDER BY di.createdAt DESC")
+    List<DatabaseInstance> findAllRunningInstances();
 }
 ```
 
-### security/
-
-**Proposito**: Componentes de seguridad y JWT
-
-```
-security/
-├── JwtAuthenticationFilter.java    # Filtro JWT
-├── JwtTokenProvider.java           # Generacion/validacion de tokens
-├── JwtAuthenticationEntryPoint.java
-├── CustomUserDetailsService.java   # Carga de usuarios
-└── SecurityUtils.java              # Utilidades de seguridad
-```
-
-**Ejemplo**:
+**Ejemplo - SubscriptionRepository.java**:
 ```java
-@Component
-public class JwtTokenProvider {
+package com.crudzaso.CrudCloud.repository;
 
-    @Value("${jwt.secret}")
-    private String jwtSecret;
+@Repository
+public interface SubscriptionRepository extends JpaRepository<Subscription, Long> {
 
-    @Value("${jwt.expiration}")
-    private Long jwtExpiration;
+    Optional<Subscription> findByUserIdAndIsActive(Long userId, Boolean isActive);
 
-    public String generateToken(Authentication authentication) {
-        UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
+    List<Subscription> findByUserId(Long userId);
 
-        Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + jwtExpiration);
-
-        return Jwts.builder()
-            .setSubject(Long.toString(userPrincipal.getId()))
-            .setIssuedAt(now)
-            .setExpiration(expiryDate)
-            .signWith(SignatureAlgorithm.HS512, jwtSecret)
-            .compact();
-    }
-
-    public boolean validateToken(String token) {
-        try {
-            Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token);
-            return true;
-        } catch (JwtException | IllegalArgumentException e) {
-            return false;
-        }
-    }
+    @Query("SELECT s FROM Subscription s WHERE s.user.id = :userId AND s.isActive = true")
+    Optional<Subscription> findActiveSubscriptionByUserId(@Param("userId") Long userId);
 }
 ```
 
-### service/
+### service/ + service/impl/ (6 Servicios)
 
-**Proposito**: Logica de negocio
+**Propósito**: Lógica de negocio
 
 ```
 service/
-├── UserService.java
-├── AuthService.java
-├── ProductService.java
-├── OrderService.java
-├── PaymentService.java
-├── EmailService.java
+├── UserService.java                    # Interface
+├── AuthenticationService.java          # Interface
+├── SubscriptionService.java            # Interface
+├── DatabaseInstanceService.java        # Interface
+├── PaymentService.java                 # Interface
+├── JwtService.java                     # Interface
 └── impl/
-    ├── UserServiceImpl.java
-    ├── AuthServiceImpl.java
-    ├── ProductServiceImpl.java
-    ├── OrderServiceImpl.java
-    └── PaymentServiceImpl.java
+    ├── UserServiceImpl.java            # CRUD usuarios
+    ├── AuthenticationServiceImpl.java  # Login con JWT + BCrypt
+    ├── SubscriptionServiceImpl.java    # Gestión planes y límites
+    ├── DatabaseInstanceServiceImpl.java # CRUD instancias (sin Docker aún)
+    ├── PaymentServiceImpl.java         # Mercado Pago integration
+    └── JwtServiceImpl.java             # Generación/validación tokens
 ```
 
-**Ejemplo**:
+**Ejemplo - UserServiceImpl.java**:
 ```java
-public interface UserService {
-    UserDTO createUser(UserCreateDTO dto);
-    UserDTO updateUser(Long id, UserUpdateDTO dto);
-    UserDTO getUserById(Long id);
-    void deleteUser(Long id);
-    List<UserDTO> getAllUsers();
-}
+package com.crudzaso.CrudCloud.service.impl;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
+@Slf4j
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
@@ -393,37 +277,318 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
 
     @Override
-    public UserDTO createUser(UserCreateDTO dto) {
-        if (userRepository.existsByEmail(dto.getEmail())) {
-            throw new BusinessException("Email ya existe");
+    public UserResponse createUser(CreateUserRequest request) {
+        log.info("Creating user with email: {}", request.getEmail());
+
+        // Validar email único
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new AppException("Email already exists", "EMAIL_EXISTS");
         }
 
-        User user = modelMapper.map(dto, User.class);
-        user.setPassword(passwordEncoder.encode(dto.getPassword()));
-        user = userRepository.save(user);
+        // Mapear DTO a entidad
+        User user = modelMapper.map(request, User.class);
 
-        return modelMapper.map(user, UserDTO.class);
+        // Hash password con BCrypt
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+
+        // Guardar
+        User savedUser = userRepository.save(user);
+        log.info("User created successfully with ID: {}", savedUser.getId());
+
+        // Mapear entidad a DTO response
+        return modelMapper.map(savedUser, UserResponse.class);
+    }
+
+    @Override
+    public UserResponse getUserById(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User", id));
+        return modelMapper.map(user, UserResponse.class);
+    }
+
+    // ... más métodos CRUD
+}
+```
+
+**Ejemplo - JwtServiceImpl.java** (código real del proyecto):
+```java
+package com.crudzaso.CrudCloud.service.impl;
+
+@Service
+@Slf4j
+public class JwtServiceImpl implements JwtService {
+
+    @Value("${jwt.secret}")
+    private String jwtSecret;
+
+    @Value("${jwt.expiration:86400000}")  // Default 24 hours
+    private long jwtExpirationMs;
+
+    private SecretKey getSigningKey() {
+        return Keys.hmacShaKeyFor(jwtSecret.getBytes());
+    }
+
+    @Override
+    public String generateToken(String username) {
+        log.debug("Generating JWT token for username: {}", username);
+
+        Date now = new Date();
+        Date expiryDate = new Date(now.getTime() + jwtExpirationMs);
+
+        // Nueva API de jjwt 0.12.3
+        String token = Jwts.builder()
+            .subject(username)
+            .issuedAt(now)
+            .expiration(expiryDate)
+            .signWith(getSigningKey(), SignatureAlgorithm.HS512)
+            .compact();
+
+        log.debug("JWT token generated successfully");
+        return token;
+    }
+
+    @Override
+    public boolean validateToken(String token) {
+        try {
+            Jwts.parserBuilder()
+                .verifyingKey(getSigningKey())
+                .build()
+                .parseSignedClaims(token);
+            return true;
+        } catch (Exception e) {
+            log.error("Invalid JWT token: {}", e.getMessage());
+            return false;
+        }
+    }
+
+    @Override
+    public String getUsernameFromToken(String token) {
+        try {
+            Claims claims = Jwts.parserBuilder()
+                .verifyingKey(getSigningKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+
+            return claims.getSubject();
+        } catch (Exception e) {
+            log.error("Error extracting username: {}", e.getMessage());
+            return null;
+        }
     }
 }
 ```
 
-### util/
+### dto/request/ (7 Request DTOs)
 
-**Proposito**: Utilidades y helpers
+**Propósito**: Validación de datos de entrada
 
 ```
-util/
-├── DateUtils.java
-├── StringUtils.java
-├── ValidationUtils.java
-└── Constants.java
+dto/request/
+├── CreateUserRequest.java
+├── LoginRequest.java
+├── CreateSubscriptionRequest.java
+├── CreateInstanceRequest.java
+├── CreateEngineRequest.java
+├── CreatePaymentRequest.java
+└── UpdateInstanceRequest.java
+```
+
+**Ejemplo - CreateUserRequest.java** (código real):
+```java
+package com.crudzaso.CrudCloud.dto.request;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class CreateUserRequest {
+
+    @NotBlank(message = "Email is required")
+    @Email(message = "Email must be valid")
+    private String email;
+
+    @NotBlank(message = "Password is required")
+    @Size(min = 6, message = "Password must be at least 6 characters")
+    private String password;
+
+    @NotBlank(message = "Name is required")
+    private String name;
+
+    @NotNull(message = "isOrganization must be provided")
+    private Boolean isOrganization = false;
+}
+```
+
+**Ejemplo - CreateInstanceRequest.java**:
+```java
+package com.crudzaso.CrudCloud.dto.request;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class CreateInstanceRequest {
+
+    @NotNull(message = "Engine ID is required")
+    private Long engineId;
+
+    @NotBlank(message = "Instance name is required")
+    @Size(min = 3, max = 50, message = "Instance name must be between 3-50 characters")
+    @Pattern(regexp = "^[a-zA-Z0-9_-]+$", message = "Only alphanumeric, underscore and hyphen allowed")
+    private String instanceName;
+
+    private Map<String, String> customConfig;  // Configuración opcional
+}
+```
+
+### dto/response/ (7 Response DTOs)
+
+**Propósito**: Formato de respuestas HTTP
+
+```
+dto/response/
+├── UserResponse.java
+├── LoginResponse.java
+├── SubscriptionResponse.java
+├── InstanceResponse.java
+├── EngineResponse.java
+├── TransactionResponse.java
+└── CredentialResponse.java
+```
+
+**Ejemplo - InstanceResponse.java**:
+```java
+package com.crudzaso.CrudCloud.dto.response;
+
+@Data
+@Builder
+public class InstanceResponse {
+    private Long id;
+    private String instanceName;
+    private String engineName;
+    private String engineVersion;
+    private InstanceStatus status;
+    private Integer port;
+    private String host;
+    private Double cpuUsage;
+    private Double memoryUsage;
+    private LocalDateTime createdAt;
+}
+```
+
+### exception/ (Excepciones Personalizadas)
+
+**Propósito**: Manejo de errores
+
+```
+exception/
+├── AppException.java                # Excepción genérica con código
+├── ResourceNotFoundException.java   # Recurso no encontrado (404)
+└── (Pendiente: GlobalExceptionHandler en Fase 4)
+```
+
+**Ejemplo - AppException.java** (código real):
+```java
+package com.crudzaso.CrudCloud.exception;
+
+@Getter
+public class AppException extends RuntimeException {
+    private final String errorCode;
+
+    public AppException(String message, String errorCode) {
+        super(message);
+        this.errorCode = errorCode;
+    }
+}
+```
+
+**Ejemplo - ResourceNotFoundException.java** (código real):
+```java
+package com.crudzaso.CrudCloud.exception;
+
+public class ResourceNotFoundException extends RuntimeException {
+
+    public ResourceNotFoundException(String resourceName, Object resourceId) {
+        super(String.format("%s not found with id: %s", resourceName, resourceId));
+    }
+
+    public ResourceNotFoundException(String message) {
+        super(message);
+    }
+}
+```
+
+### controller/ (Pendiente - Fase 4)
+
+**Propósito**: Endpoints REST API
+
+```
+controller/
+├── AuthController.java              # POST /api/v1/auth/register, /login
+├── UserController.java              # CRUD /api/v1/users
+├── InstanceController.java          # CRUD /api/v1/instances
+├── SubscriptionController.java      # GET /api/v1/subscriptions
+├── PaymentController.java           # POST /api/v1/payments
+└── HealthController.java            # GET /api/v1/health
+```
+
+**Ejemplo anticipado - InstanceController.java**:
+```java
+@RestController
+@RequestMapping("/api/v1/instances")
+@RequiredArgsConstructor
+public class InstanceController {
+
+    private final DatabaseInstanceService instanceService;
+
+    @PostMapping
+    public ResponseEntity<InstanceResponse> createInstance(
+        @RequestBody @Valid CreateInstanceRequest request,
+        @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        InstanceResponse response = instanceService.createInstance(
+            getUserId(userDetails),
+            request
+        );
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<InstanceResponse>> listInstances(
+        @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        List<InstanceResponse> instances = instanceService.getUserInstances(
+            getUserId(userDetails)
+        );
+        return ResponseEntity.ok(instances);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteInstance(@PathVariable Long id) {
+        instanceService.deleteInstance(id);
+        return ResponseEntity.noContent().build();
+    }
+}
+```
+
+### config/ (Pendiente - Fase 4)
+
+**Propósito**: Configuración de Spring
+
+```
+config/
+├── SecurityConfig.java              # Spring Security + JWT
+├── ModelMapperConfig.java           # Bean ModelMapper
+├── PasswordEncoderConfig.java       # Bean BCryptPasswordEncoder
+├── CorsConfig.java                  # Configuración CORS
+└── DockerConfig.java                # Bean DockerClient (Fase 5)
 ```
 
 ## Archivos de Recursos
 
 ### application.properties
 
-Configuracion principal:
+Configuración principal (sin credenciales sensibles):
+
 ```properties
 # Application
 spring.application.name=CrudCloud Backend
@@ -432,64 +597,174 @@ server.port=8080
 # Profile
 spring.profiles.active=dev
 
+# JPA/Hibernate
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.format_sql=true
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
+
+# JWT (valores de ejemplo - sobrescritos por variables de entorno)
+jwt.secret=CHANGE_THIS_SECRET_KEY_MINIMUM_256_BITS
+jwt.expiration=86400000
+
 # Logging
 logging.level.root=INFO
-logging.level.com.crudcloud.backend=DEBUG
+logging.level.com.crudzaso.CrudCloud=DEBUG
 ```
 
-### application-dev.properties
+### application-prod.properties
 
-Configuracion de desarrollo (ver seccion [Configuracion](/docs/01-guia-inicio/configuracion))
+Configuración de producción (usa variables de entorno):
 
-### data.sql
+```properties
+# Database (CleverCloud PostgreSQL)
+spring.datasource.url=${POSTGRESQL_ADDON_URI}
+spring.datasource.username=${POSTGRESQL_ADDON_USER}
+spring.datasource.password=${POSTGRESQL_ADDON_PASSWORD}
 
-Datos iniciales para desarrollo:
-```sql
-INSERT INTO roles (name, description) VALUES
-('ROLE_ADMIN', 'Administrador'),
-('ROLE_USER', 'Usuario regular');
+# JPA
+spring.jpa.hibernate.ddl-auto=validate
+spring.jpa.show-sql=false
+
+# JWT (desde variables de entorno)
+jwt.secret=${JWT_SECRET}
+jwt.expiration=${JWT_EXPIRATION:86400000}
+
+# Mercado Pago
+mercadopago.access.token=${MERCADOPAGO_ACCESS_TOKEN}
+
+# Docker
+docker.host=unix:///var/run/docker.sock
+docker.tls.verify=false
 ```
 
-## Archivos de Test
+## pom.xml (Dependencias Maven)
 
-```
-test/
-└── java/
-    └── com/crudcloud/backend/
-        ├── controller/
-        │   ├── UserControllerTest.java
-        │   └── ProductControllerTest.java
-        ├── service/
-        │   ├── UserServiceTest.java
-        │   └── ProductServiceTest.java
-        ├── repository/
-        │   └── UserRepositoryTest.java
-        └── integration/
-            └── UserIntegrationTest.java
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+    <groupId>com.crudzaso</groupId>
+    <artifactId>CrudCloud</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.5.7</version>
+    </parent>
+
+    <properties>
+        <java.version>21</java.version>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+    </properties>
+
+    <dependencies>
+        <!-- Spring Boot Starters -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+
+        <!-- PostgreSQL Driver -->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
+        <!-- Docker Java Client -->
+        <dependency>
+            <groupId>com.github.docker-java</groupId>
+            <artifactId>docker-java</artifactId>
+            <version>3.3.4</version>
+        </dependency>
+
+        <!-- JWT -->
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-api</artifactId>
+            <version>0.12.3</version>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-impl</artifactId>
+            <version>0.12.3</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-jackson</artifactId>
+            <version>0.12.3</version>
+            <scope>runtime</scope>
+        </dependency>
+
+        <!-- Mercado Pago SDK -->
+        <dependency>
+            <groupId>com.mercadopago</groupId>
+            <artifactId>sdk-java</artifactId>
+            <version>2.1.26</version>
+        </dependency>
+
+        <!-- ModelMapper -->
+        <dependency>
+            <groupId>org.modelmapper</groupId>
+            <artifactId>modelmapper</artifactId>
+            <version>3.2.5</version>
+        </dependency>
+
+        <!-- Lombok -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <!-- Spring Boot Test -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+</project>
 ```
 
 ## Convenciones de Nomenclatura
 
 ### Paquetes
-- Usar minusculas
-- Separar palabras con punto (no guion bajo)
-- Singular para nombres de paquetes
+- Minúsculas sin guiones bajos: `com.crudzaso.CrudCloud.service.impl`
+- Singular para nombres de paquetes: `entity` (no `entities`)
 
 ### Clases
-- **Controllers**: `*Controller.java`
-- **Services**: `*Service.java`, `*ServiceImpl.java`
-- **Repositories**: `*Repository.java`
-- **Entities**: Nombre del modelo (singular)
-- **DTOs**: `*DTO.java`, `*Request.java`, `*Response.java`
-- **Exceptions**: `*Exception.java`
-- **Config**: `*Config.java`
+- **Entidades**: `User`, `DatabaseInstance`, `Plan`
+- **Repositories**: `UserRepository`, `DatabaseInstanceRepository`
+- **Services**: `UserService` (interface), `UserServiceImpl` (implementación)
+- **DTOs Request**: `CreateUserRequest`, `UpdateInstanceRequest`
+- **DTOs Response**: `UserResponse`, `InstanceResponse`
+- **Exceptions**: `AppException`, `ResourceNotFoundException`
+- **Enums**: `InstanceStatus`, `TransactionStatus`
 
-### Metodos
-- camelCase
-- Verbos para acciones: `createUser`, `updateProduct`
-- Getters/Setters: Generados por Lombok
+### Métodos
+- camelCase: `createUser`, `getUserById`, `deleteInstance`
+- CRUD estándar: `create`, `getById`, `getAll`, `update`, `delete`
+- Repositories: `findByEmail`, `existsByContainerName`, `countActiveInstancesByUserId`
 
-## Proximos Pasos
+### Variables
+- camelCase: `userId`, `instanceName`, `containerName`
+- Constantes: `UPPERCASE_WITH_UNDERSCORES` (ej: `DEFAULT_PORT`)
 
-- Revisa las [Dependencias del Proyecto](/docs/02-arquitectura/dependencias)
-- Aprende sobre [Convenciones de Desarrollo](/docs/03-desarrollo/convenciones)
+## Próximos Pasos
+
+- Revisa las [Dependencias del Proyecto](/docs/arquitectura/dependencias)
+- Aprende sobre [Desarrollo](/docs/desarrollo/guia-desarrollo)
+- Consulta la [API Reference](/docs/api/autenticacion)

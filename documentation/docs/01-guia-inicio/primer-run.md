@@ -384,9 +384,9 @@ tail -f logs/crudcloud-backend.log | grep ERROR
 
 Ahora que la aplicacion esta corriendo exitosamente:
 
-1. Explora la [Arquitectura del Proyecto](/docs/02-arquitectura/resumen)
-2. Lee las [Convenciones de Desarrollo](/docs/03-desarrollo/convenciones)
-3. Consulta el [API Reference](/docs/04-api/autenticacion)
+1. Explora la [Arquitectura del Proyecto](/docs/arquitectura/resumen)
+2. Lee las [Convenciones de Desarrollo](/docs/desarrollo/convenciones)
+3. Consulta el [API Reference](/docs/api/autenticacion)
 
 ## Checklist Post-Run
 

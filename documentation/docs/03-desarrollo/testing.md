@@ -275,5 +275,4 @@ void testGetUserEmail() {
 
 ## Proximos Pasos
 
-- Consulta la [API Reference](/docs/04-api/autenticacion)
-- Revisa [Deployment](/docs/05-deployment/produccion)
+- Consulta la [API Reference](/docs/api/autenticacion)

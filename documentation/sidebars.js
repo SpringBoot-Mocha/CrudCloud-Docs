@@ -55,8 +55,10 @@ const sidebars = {
       items: [
         'api/autenticacion',
         'api/usuarios',
-        'api/productos',
-        'api/ordenes',
+        'api/database-instances',
+        'api/subscriptions',
+        'api/plans',
+        'api/database-engines',
         'api/pagos',
       ],
     },

@@ -5,237 +5,423 @@ title: Resumen de Arquitectura
 
 # Resumen de Arquitectura
 
-CrudCloud Backend sigue una **arquitectura en capas (Layered Architecture)** con principios de diseño orientado a objetos y patrones empresariales probados.
+CrudCloud Backend sigue una **arquitectura en capas (Layered Architecture)** con integración de orquestación de contenedores Docker para la gestión automatizada de instancias de bases de datos.
 
 ## Principios de Diseño
 
-### 1. Separacion de Responsabilidades (SoC)
+### 1. Separación de Responsabilidades (SoC)
 
-Cada capa tiene una responsabilidad unica y bien definida:
+Cada capa tiene una responsabilidad única y bien definida:
 
 - **Controller**: Manejo de HTTP requests/responses
-- **Service**: Logica de negocio
-- **Repository**: Acceso a datos
-- **Entity**: Representacion del modelo de dominio
+- **Service**: Lógica de negocio y orquestación Docker
+- **Repository**: Acceso a datos de metadata del sistema
+- **Entity**: Representación del modelo de dominio (7 tablas principales)
 
-### 2. Inversion de Dependencias (DI)
+### 2. Inversión de Dependencias (DI)
 
-Uso de Spring Framework para inyeccion de dependencias:
+Uso de Spring Framework para inyección de dependencias:
 
 ```java
 @Service
-public class UserService {
+@RequiredArgsConstructor
+public class DatabaseInstanceServiceImpl implements DatabaseInstanceService {
+    private final DatabaseInstanceRepository instanceRepository;
     private final UserRepository userRepository;
-
-    @Autowired
-    public UserService(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
+    private final SubscriptionService subscriptionService;
+    // Inyección por constructor via Lombok
 }
 ```
 
-### 3. Open/Closed Principle
+### 3. Encriptación y Seguridad
 
-Clases abiertas para extension pero cerradas para modificacion mediante interfaces y herencia.
+- **JWT**: Autenticación stateless con jjwt 0.12.3
+- **BCrypt**: Hash de contraseñas de usuarios (factor 10)
+- **AES-256**: Encriptación de credenciales de bases de datos
 
-## Arquitectura en Capas
+## Arquitectura en Capas con Docker
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                   PRESENTATION LAYER                     │
-│  ┌─────────────┐  ┌──────────────┐  ┌──────────────┐   │
-│  │ Controllers │  │  DTOs/Forms  │  │  Exception   │   │
-│  │             │  │              │  │   Handlers   │   │
-│  └─────────────┘  └──────────────┘  └──────────────┘   │
-└─────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────┐
+│                    PRESENTATION LAYER                        │
+│  ┌────────────┐  ┌────────────┐  ┌────────────┐            │
+│  │Controllers │  │   DTOs     │  │ Exception  │            │
+│  │  (REST)    │  │Request/Resp│  │  Handlers  │            │
+│  └────────────┘  └────────────┘  └────────────┘            │
+│  /api/v1/auth | /instances | /subscriptions | /payments     │
+└──────────────────────────────────────────────────────────────┘
                           ↓
-┌─────────────────────────────────────────────────────────┐
-│                    BUSINESS LAYER                        │
-│  ┌─────────────┐  ┌──────────────┐  ┌──────────────┐   │
-│  │  Services   │  │  Validators  │  │   Mappers    │   │
-│  │             │  │              │  │              │   │
-│  └─────────────┘  └──────────────┘  └──────────────┘   │
-└─────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────┐
+│                     BUSINESS LAYER                           │
+│  ┌────────────┐  ┌────────────┐  ┌────────────┐            │
+│  │  Services  │  │ Validators │  │ Mappers    │            │
+│  │  (6 impl)  │  │            │  │ModelMapper │            │
+│  └────────────┘  └────────────┘  └────────────┘            │
+│  UserService | AuthService | DatabaseInstanceService        │
+│  SubscriptionService | PaymentService | JwtService          │
+└──────────────────────────────────────────────────────────────┘
                           ↓
-┌─────────────────────────────────────────────────────────┐
-│                  PERSISTENCE LAYER                       │
-│  ┌─────────────┐  ┌──────────────┐  ┌──────────────┐   │
-│  │Repositories │  │   Entities   │  │  Migrations  │   │
-│  │   (JPA)     │  │              │  │              │   │
-│  └─────────────┘  └──────────────┘  └──────────────┘   │
-└─────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────┐
+│                   PERSISTENCE LAYER                          │
+│  ┌────────────┐  ┌────────────┐  ┌────────────┐            │
+│  │Repositories│  │  Entities  │  │   Enums    │            │
+│  │  (7 repos) │  │ (7 tables) │  │            │            │
+│  └────────────┘  └────────────┘  └────────────┘            │
+│  User | Plan | Subscription | DatabaseEngine               │
+│  DatabaseInstance | Credential | Transaction                │
+└──────────────────────────────────────────────────────────────┘
                           ↓
-┌─────────────────────────────────────────────────────────┐
-│                    DATABASE LAYER                        │
-│              PostgreSQL 15+ (Relational DB)              │
-└─────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────┐
+│                   DATABASE LAYER (Metadata)                  │
+│  PostgreSQL 15+ (CleverCloud Test / VPS Production)         │
+│  Host: bsynuybdaaahq5cfinjv-postgresql.services...          │
+└──────────────────────────────────────────────────────────────┘
+                          ↓
+┌──────────────────────────────────────────────────────────────┐
+│               DOCKER ORCHESTRATION LAYER                     │
+│  ┌────────────────────────────────────────────────┐         │
+│  │          docker-java 3.3.4 Client              │         │
+│  │  - Container creation (MySQL, PostgreSQL, etc) │         │
+│  │  - Lifecycle management (start/stop/delete)    │         │
+│  │  - Stats API (CPU/memory metrics)              │         │
+│  └────────────────────────────────────────────────┘         │
+│              Docker Daemon (/var/run/docker.sock)            │
+└──────────────────────────────────────────────────────────────┘
+                          ↓
+    ┌──────────┬──────────┬──────────┬──────────┬──────────┐
+    │ MySQL    │ Postgres │ MongoDB  │ Redis    │SQL Server│
+    │ :3306    │ :5432    │ :27017   │ :6379    │ :1433    │
+    │ [User1]  │ [User2]  │ [User3]  │ [User4]  │ [User5]  │
+    └──────────┴──────────┴──────────┴──────────┴──────────┘
+        Contenedores Docker de Bases de Datos de Clientes
 ```
 
-## Capas Detalladas
+## Modelo de Dominio (7 Entidades)
 
-### 1. Presentation Layer (Controller)
+### Entidades Core
 
-**Responsabilidad**: Manejar requests HTTP y responses
+```
+User (usuarios y organizaciones)
+ ├─ id: Long
+ ├─ email: String (unique)
+ ├─ password: String (BCrypt hash)
+ ├─ name: String
+ ├─ isOrganization: Boolean
+ └─ Relaciones:
+    ├─ 1:N → Subscription
+    ├─ 1:N → DatabaseInstance
+    └─ 1:N → Transaction
 
-**Componentes**:
-- `@RestController`: Endpoints REST
-- `@RequestMapping`: Mapeo de rutas
-- DTOs: Data Transfer Objects
-- Exception Handlers: Manejo centralizado de errores
+Plan (FREE, STANDARD, PREMIUM)
+ ├─ id: Long
+ ├─ name: String
+ ├─ price: Double ($0, $9.99, $19.99)
+ ├─ maxInstances: Integer (2, 5, 10)
+ └─ Relaciones:
+    └─ 1:N → Subscription
 
-**Ejemplo**:
+Subscription (relación User-Plan)
+ ├─ id: Long
+ ├─ user: User (ManyToOne)
+ ├─ plan: Plan (ManyToOne)
+ ├─ isActive: Boolean
+ ├─ createdAt: LocalDateTime
+ └─ Control de límites de instancias
+
+DatabaseEngine (motores de BD soportados)
+ ├─ id: Long
+ ├─ name: String (MySQL, PostgreSQL, MongoDB, etc.)
+ ├─ defaultPort: Integer (3306, 5432, 27017...)
+ ├─ dockerImage: String (mysql:latest, postgres:15, etc.)
+ └─ Relaciones:
+    └─ 1:N → DatabaseInstance
+
+DatabaseInstance (instancias de BD)
+ ├─ id: Long
+ ├─ user: User (ManyToOne)
+ ├─ engine: DatabaseEngine (ManyToOne)
+ ├─ instanceName: String
+ ├─ containerName: String (único en Docker)
+ ├─ port: Integer (puerto host)
+ ├─ status: InstanceStatus (CREATING, RUNNING, SUSPENDED, DELETED)
+ ├─ cpuUsage: Double (%)
+ ├─ memoryUsage: Double (MB)
+ ├─ createdAt: LocalDateTime
+ └─ Relaciones:
+    └─ 1:1 → Credential
+
+Credential (credenciales de conexión)
+ ├─ id: Long
+ ├─ instance: DatabaseInstance (OneToOne)
+ ├─ username: String (AES-256 encriptado)
+ ├─ password: String (AES-256 encriptado)
+ ├─ host: String (IP del servidor Docker)
+ ├─ port: Integer
+ ├─ databaseName: String
+ └─ connectionUri: String (AES-256 encriptado)
+
+Transaction (pagos con Mercado Pago)
+ ├─ id: Long
+ ├─ user: User (ManyToOne)
+ ├─ mercadopagoPaymentId: String
+ ├─ amount: Double
+ ├─ status: TransactionStatus (PENDING, APPROVED, FAILED)
+ ├─ createdAt: LocalDateTime
+ └─ Relación con upgrades de plan
+```
+
+## Enums del Sistema
+
+### InstanceStatus
+
 ```java
-@RestController
-@RequestMapping("/api/users")
-public class UserController {
-
-    @GetMapping("/{id}")
-    public ResponseEntity<UserDTO> getUser(@PathVariable Long id) {
-        // ...
-    }
-
-    @PostMapping
-    public ResponseEntity<UserDTO> createUser(@Valid @RequestBody UserCreateDTO dto) {
-        // ...
-    }
+public enum InstanceStatus {
+    CREATING,   // Contenedor Docker en creación
+    RUNNING,    // Contenedor activo y funcional
+    SUSPENDED,  // Contenedor detenido temporalmente
+    DELETED     // Contenedor eliminado (soft delete)
 }
 ```
 
-### 2. Business Layer (Service)
+### TransactionStatus
 
-**Responsabilidad**: Implementar logica de negocio
-
-**Componentes**:
-- `@Service`: Servicios de negocio
-- Business Logic: Reglas de negocio
-- Validation: Validaciones complejas
-- ModelMapper: Conversion entre DTOs y entidades
-
-**Ejemplo**:
 ```java
-@Service
-@Transactional
-public class UserService {
-
-    private final UserRepository userRepository;
-    private final ModelMapper modelMapper;
-
-    public UserDTO createUser(UserCreateDTO dto) {
-        // Validacion de negocio
-        if (userRepository.existsByEmail(dto.getEmail())) {
-            throw new BusinessException("Email ya existe");
-        }
-
-        // Mapeo y persistencia
-        User user = modelMapper.map(dto, User.class);
-        user = userRepository.save(user);
-
-        return modelMapper.map(user, UserDTO.class);
-    }
+public enum TransactionStatus {
+    PENDING,    // Pago en proceso
+    APPROVED,   // Pago aprobado por Mercado Pago
+    FAILED      // Pago rechazado
 }
 ```
 
-### 3. Persistence Layer (Repository)
+## Flujo de Creación de Instancia de BD
 
-**Responsabilidad**: Acceso y persistencia de datos
+```
+1. Usuario autenticado → POST /api/v1/instances
+   Body: { engineId: 1, instanceName: "mydb" }
+                ↓
+2. Controller → Validación JWT + DTOs
+                ↓
+3. DatabaseInstanceService:
+   a. Verificar límite de instancias del plan
+   b. Generar containerName único
+   c. Asignar puerto disponible
+   d. Crear entidad DatabaseInstance (status: CREATING)
+                ↓
+4. docker-java Client:
+   a. Pull image si no existe (mysql:latest)
+   b. Crear contenedor con config:
+      - Nombre: containerName
+      - Puerto: hostPort:3306
+      - Variables: MYSQL_ROOT_PASSWORD=generated
+   c. Iniciar contenedor
+                ↓
+5. Generar Credential:
+   a. Encriptar username/password con AES-256
+   b. Guardar host, port, databaseName
+   c. Asociar a DatabaseInstance
+                ↓
+6. Actualizar DatabaseInstance (status: RUNNING)
+                ↓
+7. Retornar InstanceResponse al cliente:
+   {
+     "id": 123,
+     "instanceName": "mydb",
+     "engine": "MySQL",
+     "status": "RUNNING",
+     "port": 33061,
+     "createdAt": "2025-11-10T10:30:00"
+   }
+```
 
-**Componentes**:
-- `@Repository`: Repositorios JPA
-- Spring Data JPA: Abstraccion de acceso a datos
-- Custom Queries: Consultas personalizadas
-- Specifications: Consultas dinamicas
+## Patrones de Diseño Implementados
 
-**Ejemplo**:
+### 1. Repository Pattern
+
+Abstracción del acceso a datos con Spring Data JPA:
+
 ```java
 @Repository
-public interface UserRepository extends JpaRepository<User, Long> {
+public interface DatabaseInstanceRepository extends JpaRepository<DatabaseInstance, Long> {
+    List<DatabaseInstance> findByUserIdAndStatus(Long userId, InstanceStatus status);
 
-    Optional<User> findByEmail(String email);
+    boolean existsByContainerName(String containerName);
 
-    boolean existsByEmail(String email);
-
-    @Query("SELECT u FROM User u WHERE u.active = true")
-    List<User> findAllActiveUsers();
+    @Query("SELECT COUNT(di) FROM DatabaseInstance di " +
+           "WHERE di.user.id = :userId AND di.status != 'DELETED'")
+    long countActiveInstancesByUserId(@Param("userId") Long userId);
 }
 ```
 
-### 4. Domain Layer (Entity)
+### 2. DTO Pattern
 
-**Responsabilidad**: Modelar el dominio de negocio
+Separación entre entidades de dominio y objetos de transferencia:
 
-**Componentes**:
-- `@Entity`: Entidades JPA
-- Relationships: Relaciones entre entidades
-- Business Logic: Logica asociada al dominio
-- Validations: Validaciones de nivel de campo
-
-**Ejemplo**:
 ```java
-@Entity
-@Table(name = "users")
+// Request DTO
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class User {
+public class CreateInstanceRequest {
+    @NotNull(message = "Engine ID is required")
+    private Long engineId;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @NotBlank(message = "Instance name is required")
+    @Size(min = 3, max = 50)
+    private String instanceName;
+}
+
+// Response DTO
+@Data
+public class InstanceResponse {
     private Long id;
+    private String instanceName;
+    private String engineName;
+    private InstanceStatus status;
+    private Integer port;
+    private Double cpuUsage;
+    private Double memoryUsage;
+    private LocalDateTime createdAt;
+}
+```
 
-    @Column(unique = true, nullable = false)
-    @Email
-    private String email;
+### 3. Builder Pattern
 
-    @Column(nullable = false)
-    private String password;
+Construcción de entidades complejas (via Lombok):
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-        name = "user_roles",
-        joinColumns = @JoinColumn(name = "user_id"),
-        inverseJoinColumns = @JoinColumn(name = "role_id")
-    )
-    private Set<Role> roles;
+```java
+@Entity
+@Builder
+@Data
+public class DatabaseInstance {
+    private Long id;
+    private User user;
+    private DatabaseEngine engine;
+    private String instanceName;
+    private String containerName;
+    private InstanceStatus status;
+    // ... más campos
+}
 
-    // Business methods
-    public boolean hasRole(String roleName) {
-        return roles.stream()
-            .anyMatch(role -> role.getName().equals(roleName));
+// Uso
+DatabaseInstance instance = DatabaseInstance.builder()
+    .user(user)
+    .engine(engine)
+    .instanceName("mydb")
+    .containerName("crudcloud_mysql_" + UUID.randomUUID())
+    .status(InstanceStatus.CREATING)
+    .build();
+```
+
+### 4. Service Layer Pattern
+
+Encapsulación de lógica de negocio compleja:
+
+```java
+@Service
+@RequiredArgsConstructor
+@Slf4j
+public class DatabaseInstanceServiceImpl implements DatabaseInstanceService {
+
+    private final DatabaseInstanceRepository instanceRepository;
+    private final SubscriptionService subscriptionService;
+    private final UserRepository userRepository;
+    // TODO: private final DockerClient dockerClient;
+
+    @Override
+    public InstanceResponse createInstance(Long userId, CreateInstanceRequest request) {
+        // 1. Validar límite de instancias
+        Subscription subscription = subscriptionService.getActiveSubscription(userId);
+        long currentCount = instanceRepository.countActiveInstancesByUserId(userId);
+
+        if (currentCount >= subscription.getPlan().getMaxInstances()) {
+            throw new AppException("Instance limit reached", "LIMIT_EXCEEDED");
+        }
+
+        // 2. Crear instancia (lógica de orquestación Docker)
+        // ...
+    }
+}
+```
+
+### 5. Strategy Pattern
+
+Para selección dinámica de motor de BD:
+
+```java
+public interface DatabaseEngineStrategy {
+    DockerContainerConfig createContainerConfig(String instanceName);
+    Credential generateCredentials(String host, int port);
+}
+
+public class MySQLEngineStrategy implements DatabaseEngineStrategy {
+    @Override
+    public DockerContainerConfig createContainerConfig(String instanceName) {
+        return DockerContainerConfig.builder()
+            .image("mysql:latest")
+            .envVars(Map.of(
+                "MYSQL_ROOT_PASSWORD", generatePassword(),
+                "MYSQL_DATABASE", instanceName
+            ))
+            .ports(Map.of(3306, findAvailablePort()))
+            .build();
     }
 }
 ```
 
 ## Componentes Transversales
 
-### Security Layer
+### Security Layer (JWT)
 
-**JWT Authentication**:
+**JwtServiceImpl**: Generación y validación de tokens
+
 ```java
-@Component
-public class JwtAuthenticationFilter extends OncePerRequestFilter {
+@Service
+@Slf4j
+public class JwtServiceImpl implements JwtService {
+
+    @Value("${jwt.secret}")
+    private String jwtSecret;
+
+    @Value("${jwt.expiration:86400000}") // 24 hours
+    private long jwtExpirationMs;
+
+    private SecretKey getSigningKey() {
+        return Keys.hmacShaKeyFor(jwtSecret.getBytes());
+    }
 
     @Override
-    protected void doFilterInternal(
-        HttpServletRequest request,
-        HttpServletResponse response,
-        FilterChain filterChain
-    ) throws ServletException, IOException {
-        // Extract and validate JWT token
-        String token = extractToken(request);
+    public String generateToken(String username) {
+        Date now = new Date();
+        Date expiryDate = new Date(now.getTime() + jwtExpirationMs);
 
-        if (token != null && jwtTokenProvider.validateToken(token)) {
-            Authentication auth = jwtTokenProvider.getAuthentication(token);
-            SecurityContextHolder.getContext().setAuthentication(auth);
+        return Jwts.builder()
+            .subject(username)              // Nueva API jjwt 0.12.3
+            .issuedAt(now)                  // Nueva API
+            .expiration(expiryDate)         // Nueva API
+            .signWith(getSigningKey(), SignatureAlgorithm.HS512)
+            .compact();
+    }
+
+    @Override
+    public boolean validateToken(String token) {
+        try {
+            Jwts.parserBuilder()
+                .verifyingKey(getSigningKey())
+                .build()
+                .parseSignedClaims(token);
+            return true;
+        } catch (Exception e) {
+            log.error("Invalid JWT token: {}", e.getMessage());
+            return false;
         }
-
-        filterChain.doFilter(request, response);
     }
 }
 ```
 
 ### Exception Handling
 
-**Global Exception Handler**:
+**GlobalExceptionHandler**: Manejo centralizado de errores
+
 ```java
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -244,199 +430,123 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleResourceNotFound(
         ResourceNotFoundException ex
     ) {
-        ErrorResponse error = new ErrorResponse(
-            HttpStatus.NOT_FOUND.value(),
-            ex.getMessage(),
-            LocalDateTime.now()
-        );
-        return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
+        ErrorResponse error = ErrorResponse.builder()
+            .status(HttpStatus.NOT_FOUND.value())
+            .message(ex.getMessage())
+            .timestamp(LocalDateTime.now())
+            .build();
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
+    @ExceptionHandler(AppException.class)
+    public ResponseEntity<ErrorResponse> handleAppException(AppException ex) {
+        ErrorResponse error = ErrorResponse.builder()
+            .status(HttpStatus.BAD_REQUEST.value())
+            .message(ex.getMessage())
+            .errorCode(ex.getErrorCode())
+            .timestamp(LocalDateTime.now())
+            .build();
+
+        return ResponseEntity.badRequest().body(error);
     }
 }
 ```
 
 ### Validation Layer
 
-**Bean Validation**:
+**Bean Validation en DTOs**:
+
 ```java
 @Data
-public class UserCreateDTO {
+public class CreateUserRequest {
 
-    @NotBlank(message = "Email es requerido")
-    @Email(message = "Email debe ser valido")
+    @NotBlank(message = "Email is required")
+    @Email(message = "Email must be valid")
     private String email;
 
-    @NotBlank(message = "Password es requerido")
-    @Size(min = 8, message = "Password debe tener al menos 8 caracteres")
-    @Pattern(
-        regexp = "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d).*$",
-        message = "Password debe contener mayusculas, minusculas y numeros"
-    )
+    @NotBlank(message = "Password is required")
+    @Size(min = 6, message = "Password must be at least 6 characters")
     private String password;
-}
-```
 
-## Patrones de Diseño Implementados
+    @NotBlank(message = "Name is required")
+    private String name;
 
-### 1. Repository Pattern
-
-Abstraccion del acceso a datos:
-```java
-public interface GenericRepository<T, ID> {
-    T save(T entity);
-    Optional<T> findById(ID id);
-    List<T> findAll();
-    void deleteById(ID id);
-}
-```
-
-### 2. DTO Pattern
-
-Transferencia de datos entre capas:
-```java
-// Request DTO
-public class UserCreateDTO {
-    private String email;
-    private String password;
-}
-
-// Response DTO
-public class UserDTO {
-    private Long id;
-    private String email;
-    private String fullName;
-}
-```
-
-### 3. Builder Pattern
-
-Construccion de objetos complejos (via Lombok):
-```java
-@Builder
-public class User {
-    private Long id;
-    private String email;
-    private String password;
-}
-
-// Uso
-User user = User.builder()
-    .email("user@example.com")
-    .password("encrypted")
-    .build();
-```
-
-### 4. Strategy Pattern
-
-Para procesamiento de pagos:
-```java
-public interface PaymentStrategy {
-    PaymentResult process(PaymentRequest request);
-}
-
-public class MercadoPagoStrategy implements PaymentStrategy {
-    @Override
-    public PaymentResult process(PaymentRequest request) {
-        // Implementacion Mercado Pago
-    }
-}
-```
-
-### 5. Factory Pattern
-
-Para creacion de objetos:
-```java
-@Component
-public class NotificationFactory {
-
-    public Notification createNotification(NotificationType type) {
-        return switch(type) {
-            case EMAIL -> new EmailNotification();
-            case SMS -> new SmsNotification();
-            case PUSH -> new PushNotification();
-        };
-    }
-}
-```
-
-## Flujo de una Request Tipica
-
-```
-1. Cliente → HTTP Request → Controller
-                              ↓
-2. Controller → Validacion → DTO
-                              ↓
-3. DTO → ModelMapper → Entity
-                              ↓
-4. Entity → Service → Business Logic
-                              ↓
-5. Service → Repository → Database
-                              ↓
-6. Database → Result → Repository
-                              ↓
-7. Repository → Entity → Service
-                              ↓
-8. Service → ModelMapper → DTO
-                              ↓
-9. DTO → Controller → HTTP Response → Cliente
-```
-
-### Ejemplo Completo
-
-```java
-// 1. Request llega al controller
-@PostMapping
-public ResponseEntity<UserDTO> createUser(@Valid @RequestBody UserCreateDTO dto) {
-    // 2. Controller delega al service
-    UserDTO created = userService.createUser(dto);
-    // 9. Controller retorna response
-    return ResponseEntity.status(HttpStatus.CREATED).body(created);
-}
-
-// 3-8. Service maneja la logica
-@Service
-public class UserService {
-    public UserDTO createUser(UserCreateDTO dto) {
-        // 3. Mapear DTO a Entity
-        User user = modelMapper.map(dto, User.class);
-
-        // 4. Aplicar logica de negocio
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-
-        // 5-6. Persistir en base de datos
-        user = userRepository.save(user);
-
-        // 7-8. Mapear Entity a DTO
-        return modelMapper.map(user, UserDTO.class);
-    }
+    @NotNull(message = "isOrganization must be provided")
+    private Boolean isOrganization = false;
 }
 ```
 
 ## Decisiones de Arquitectura
 
-### ¿Por que Arquitectura en Capas?
+### ¿Por qué Arquitectura en Capas?
 
-- **Separacion clara de responsabilidades**
-- **Facil de entender y mantener**
-- **Testeable**: Cada capa se puede testear independientemente
+- **Separación clara**: Cada capa tiene responsabilidades bien definidas
+- **Testeable**: Se pueden testear capas independientemente
+- **Mantenible**: Fácil localizar y modificar funcionalidad
 - **Escalable**: Se pueden optimizar capas individuales
-- **Framework-friendly**: Encaja bien con Spring Boot
+- **Framework-friendly**: Encaja perfectamente con Spring Boot
 
-### ¿Por que Spring Boot?
+### ¿Por qué Docker para Bases de Datos?
 
-- **Ecosistema maduro**: Amplio soporte y comunidad
-- **Convencion sobre configuracion**: Menos codigo boilerplate
-- **Integracion facil**: Con JPA, Security, etc.
-- **Produccion-ready**: Actuator, monitoring, metrics
+- **Aislamiento**: Cada instancia en su propio contenedor
+- **Portabilidad**: Imágenes oficiales de DockerHub
+- **Escalabilidad**: Fácil crear/destruir instancias
+- **Seguridad**: Contenedores aislados con networking controlado
+- **Multi-motor**: Soporte para 6+ motores de BD desde una única API
 
-### ¿Por que PostgreSQL?
+### ¿Por qué PostgreSQL para Metadata?
 
-- **ACID compliant**: Transacciones confiables
-- **Performance**: Excelente para cargas pesadas
-- **Extensible**: Tipos de datos avanzados (JSON, arrays)
+- **ACID compliant**: Transacciones confiables para operaciones críticas
+- **Performance**: Excelente para consultas complejas (joins, aggregations)
+- **Relacional**: Modelo perfecto para relaciones User-Plan-Subscription-Instance
+- **JSON support**: Almacenamiento flexible si se necesita
 - **Open Source**: Sin costos de licencia
 
-## Proximos Pasos
+### ¿Por qué JWT sobre Sesiones?
 
-- Explora la [Estructura del Proyecto](/docs/02-arquitectura/estructura-proyecto)
-- Revisa las [Dependencias](/docs/02-arquitectura/dependencias)
-- Aprende sobre [Convenciones de Desarrollo](/docs/03-desarrollo/convenciones)
+- **Stateless**: No requiere almacenamiento de sesiones en servidor
+- **Escalable**: Funciona en arquitecturas distribuidas
+- **Mobile-friendly**: Fácil integración con apps móviles
+- **Cross-domain**: Autenticación entre múltiples dominios
+- **Payload**: Incluye información del usuario (username, roles)
+
+## Estado de Implementación
+
+### ✅ Completado (60%)
+
+- **Fase 1**: Configuración inicial de Spring Boot 3.5.7 con Java 21
+- **Fase 2**:
+  - 7 Entidades JPA con relaciones bidireccionales
+  - 2 Enums (InstanceStatus, TransactionStatus)
+  - 7 Repositories con Spring Data JPA
+- **Fase 3**:
+  - 6 Servicios implementados (User, Auth, Subscription, DatabaseInstance, Payment, Jwt)
+  - 14 DTOs (7 Request + 7 Response)
+  - Validaciones con Jakarta Validation
+  - ModelMapper para mapeo automático
+
+### ⏳ Pendiente (40%)
+
+- **Fase 4** (Controllers + Security):
+  - 6 Controllers REST
+  - Configuración Spring Security
+  - JwtAuthenticationFilter
+  - CORS y CSRF configuration
+
+- **Fase 5** (Docker Integration):
+  - Configuración docker-java client
+  - Lógica de creación de contenedores
+  - Monitoreo de métricas (Docker Stats API)
+  - Gestión de lifecycle de contenedores
+
+- **Fase 6** (Frontend):
+  - Dashboard web con React/Vue
+  - Gestión visual de instancias
+  - Monitoreo en tiempo real
+
+## Próximos Pasos
+
+- Explora la [Estructura del Proyecto](/docs/arquitectura/estructura-proyecto)
+- Revisa las [Dependencias](/docs/arquitectura/dependencias)
+- Aprende sobre [Desarrollo](/docs/desarrollo/guia-desarrollo)

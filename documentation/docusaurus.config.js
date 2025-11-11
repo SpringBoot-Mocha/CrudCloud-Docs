@@ -106,11 +106,11 @@ const config = {
               },
               {
                 label: 'Guia de Inicio',
-                to: '/docs/01-guia-inicio/requisitos',
+                to: '/docs/guia-inicio/requisitos',
               },
               {
                 label: 'API Reference',
-                to: '/docs/04-api/autenticacion',
+                to: '/docs/api/autenticacion',
               },
             ],
           },
