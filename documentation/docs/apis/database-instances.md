@@ -1,6 +1,6 @@
 ---
-sidebar_position: 3
-title: Database Instances
+title: Database Instances API
+sidebar_label: Database Instances
 ---
 
 # Database Instances API
@@ -18,7 +18,7 @@ http://localhost:8080/api/v1/instances
 Todos los endpoints requieren autenticación JWT.
 
 ```http
-Authorization: Bearer <your-jwt-token>
+Authorization: Bearer your-jwt-token
 ```
 
 ---
@@ -32,7 +32,7 @@ Crea una nueva instancia de base de datos en un contenedor Docker.
 **Request:**
 ```http
 POST /api/v1/instances
-Authorization: Bearer <jwt-token>
+Authorization: Bearer jwt-token
 Content-Type: application/json
 
 {
@@ -94,7 +94,7 @@ Obtiene todas las instancias de bases de datos del usuario autenticado.
 **Request:**
 ```http
 GET /api/v1/instances
-Authorization: Bearer <jwt-token>
+Authorization: Bearer jwt-token
 ```
 
 **Query Parameters (opcionales):**
@@ -109,7 +109,7 @@ Authorization: Bearer <jwt-token>
 **Request Example:**
 ```http
 GET /api/v1/instances?status=RUNNING&page=0&size=20
-Authorization: Bearer <jwt-token>
+Authorization: Bearer jwt-token
 ```
 
 **Response (200 OK):**
@@ -162,19 +162,19 @@ Authorization: Bearer <jwt-token>
 
 ## Obtener Detalles de Instancia
 
-### GET /instances/{id}
+### GET /instances/id
 
 Obtiene los detalles completos de una instancia específica.
 
 **Request:**
 ```http
 GET /api/v1/instances/42
-Authorization: Bearer <jwt-token>
+Authorization: Bearer jwt-token
 ```
 
 **Response (200 OK):**
 ```json
-{
+
   "id": 42,
   "name": "my-mysql-instance",
   "description": "MySQL instance for production",
@@ -189,14 +189,13 @@ Authorization: Bearer <jwt-token>
   "updatedAt": "2025-11-10T16:45:00Z",
   "cpuUsage": 15.2,
   "memoryUsage": 256.8,
-  "credentials": {
+  "credentials": 
     "host": "91.98.225.17",
     "port": 3306,
     "databaseName": "crudcloud_db_42",
     "username": "user_42",
     "password": "encrypted_password_here"
-  }
-}
+  
 ```
 
 **Errores:**
@@ -208,31 +207,30 @@ Authorization: Bearer <jwt-token>
 
 ## Obtener Credenciales de Conexión
 
-### GET /instances/{id}/credentials
+### GET /instances/id/credentials
 
 Obtiene las credenciales de conexión de una instancia específica.
 
 **Request:**
 ```http
 GET /api/v1/instances/42/credentials
-Authorization: Bearer <jwt-token>
+Authorization: Bearer jwt-token
 ```
 
 **Response (200 OK):**
 ```json
-{
+
   "host": "91.98.225.17",
   "port": 3306,
   "databaseName": "crudcloud_db_42",
   "username": "user_42",
   "password": "SecurePassword123!",
   "connectionString": "jdbc:mysql://91.98.225.17:3306/crudcloud_db_42",
-  "connectionExample": {
+  "connectionExample": 
     "java": "DriverManager.getConnection(\"jdbc:mysql://91.98.225.17:3306/crudcloud_db_42\", \"user_42\", \"SecurePassword123!\")",
     "python": "pymysql.connect(host='91.98.225.17', port=3306, user='user_42', password='SecurePassword123!', database='crudcloud_db_42')",
     "nodejs": "mysql.createConnection({ host: '91.98.225.17', port: 3306, user: 'user_42', password: 'SecurePassword123!', database: 'crudcloud_db_42' })"
-  }
-}
+  
 ```
 
 **Errores:**
@@ -244,19 +242,19 @@ Authorization: Bearer <jwt-token>
 
 ## Actualizar Estado de Instancia
 
-### PUT /instances/{id}/status
+### PUT /instances/id/status
 
 Actualiza el estado de una instancia (iniciar, pausar, etc.).
 
 **Request:**
 ```http
 PUT /api/v1/instances/42/status
-Authorization: Bearer <jwt-token>
+Authorization: Bearer jwt-token
 Content-Type: application/json
 
-{
+
   "status": "SUSPENDED"
-}
+
 ```
 
 **Request Body:**
@@ -267,13 +265,13 @@ Content-Type: application/json
 
 **Response (200 OK):**
 ```json
-{
+
   "id": 42,
   "name": "my-mysql-instance",
   "status": "SUSPENDED",
   "message": "Instance status updated successfully",
   "updatedAt": "2025-11-10T17:00:00Z"
-}
+
 ```
 
 **Errores:**
@@ -287,23 +285,23 @@ Content-Type: application/json
 
 ## Obtener Métricas de Instancia
 
-### GET /instances/{id}/metrics
+### GET /instances/id/metrics
 
 Obtiene métricas de uso en tiempo real (CPU, memoria) desde Docker Stats API.
 
 **Request:**
 ```http
 GET /api/v1/instances/42/metrics
-Authorization: Bearer <jwt-token>
+Authorization: Bearer jwt-token
 ```
 
 **Response (200 OK):**
 ```json
-{
+
   "instanceId": 42,
   "containerName": "crudcloud-mysql-42",
   "status": "RUNNING",
-  "metrics": {
+  "metrics": 
     "cpuUsagePercentage": 15.2,
     "memoryUsageMB": 256.8,
     "memoryLimitMB": 512.0,
@@ -311,9 +309,9 @@ Authorization: Bearer <jwt-token>
     "networkTxMB": 5.2,
     "blockReadMB": 100.0,
     "blockWriteMB": 50.0
-  },
+  
   "timestamp": "2025-11-10T17:10:00Z"
-}
+
 ```
 
 **Errores:**
@@ -326,14 +324,14 @@ Authorization: Bearer <jwt-token>
 
 ## Eliminar Instancia
 
-### DELETE /instances/{id}
+### DELETE /instances/id
 
 Elimina una instancia de base de datos y su contenedor Docker asociado.
 
 **Request:**
 ```http
 DELETE /api/v1/instances/42
-Authorization: Bearer <jwt-token>
+Authorization: Bearer jwt-token
 ```
 
 **Response (200 OK):**

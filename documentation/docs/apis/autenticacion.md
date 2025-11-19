@@ -1,6 +1,6 @@
 ---
-sidebar_position: 1
-title: Autenticacion
+title: Autenticación API
+sidebar_label: Autenticacion
 ---
 
 # API de Autenticacion

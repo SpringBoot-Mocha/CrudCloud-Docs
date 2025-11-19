@@ -1,6 +1,6 @@
 ---
-sidebar_position: 5
-title: Plans
+title: Plans API
+sidebar_label: Plans
 ---
 
 # Plans API
@@ -138,7 +138,7 @@ GET /api/v1/plans
 
 ## Obtener Plan por ID
 
-### GET /plans/{id}
+### GET /plans/id
 
 Obtiene los detalles de un plan específico.
 
@@ -149,7 +149,7 @@ GET /api/v1/plans/2
 
 **Response (200 OK):**
 ```json
-{
+
   "id": 2,
   "name": "Standard",
   "description": "For small teams and growing projects",

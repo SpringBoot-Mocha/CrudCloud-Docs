@@ -1,6 +1,6 @@
 ---
-sidebar_position: 6
-title: Database Engines
+title: Database Engines API
+sidebar_label: Database Engines
 ---
 
 # Database Engines API
@@ -32,9 +32,9 @@ GET /api/v1/engines
 
 **Response (200 OK):**
 ```json
-{
+
   "engines": [
-    {
+    
       "id": 1,
       "name": "MySQL",
       "version": "8.0",
@@ -46,8 +46,8 @@ GET /api/v1/engines
       "isActive": true,
       "documentation": "https://dev.mysql.com/doc/",
       "minPlanRequired": "Free"
-    },
-    {
+    
+    
       "id": 2,
       "name": "PostgreSQL",
       "version": "15",
@@ -59,8 +59,8 @@ GET /api/v1/engines
       "isActive": true,
       "documentation": "https://www.postgresql.org/docs/",
       "minPlanRequired": "Free"
-    },
-    {
+    
+    
       "id": 3,
       "name": "MongoDB",
       "version": "6.0",
@@ -72,8 +72,8 @@ GET /api/v1/engines
       "isActive": true,
       "documentation": "https://docs.mongodb.com/",
       "minPlanRequired": "Standard"
-    },
-    {
+    
+    
       "id": 4,
       "name": "Redis",
       "version": "7.0",
@@ -85,8 +85,8 @@ GET /api/v1/engines
       "isActive": true,
       "documentation": "https://redis.io/docs/",
       "minPlanRequired": "Standard"
-    },
-    {
+    
+    
       "id": 5,
       "name": "SQL Server",
       "version": "2022",
@@ -98,8 +98,8 @@ GET /api/v1/engines
       "isActive": true,
       "documentation": "https://docs.microsoft.com/sql/",
       "minPlanRequired": "Standard"
-    },
-    {
+    
+    
       "id": 6,
       "name": "Cassandra",
       "version": "4.1",
@@ -111,11 +111,11 @@ GET /api/v1/engines
       "isActive": true,
       "documentation": "https://cassandra.apache.org/doc/",
       "minPlanRequired": "Premium"
-    }
-  ],
+    
+  
   "totalEngines": 6,
   "categories": ["SQL", "NoSQL", "Cache/Key-Value", "NoSQL/Wide-Column"]
-}
+
 ```
 
 **Response Fields:**
@@ -141,7 +141,7 @@ GET /api/v1/engines
 
 ## Obtener Motor por ID
 
-### GET /engines/{id}
+### GET /engines/id
 
 Obtiene los detalles completos de un motor específico.
 
@@ -152,7 +152,7 @@ GET /api/v1/engines/2
 
 **Response (200 OK):**
 ```json
-{
+
   "id": 2,
   "name": "PostgreSQL",
   "version": "15",
@@ -164,7 +164,7 @@ GET /api/v1/engines/2
   "isActive": true,
   "documentation": "https://www.postgresql.org/docs/",
   "minPlanRequired": "Free",
-  "specifications": {
+  "specifications": 
     "maxDatabaseSize": "Unlimited",
     "maxConnections": 100,
     "supportedLanguages": ["SQL", "PL/pgSQL", "PL/Python", "PL/Perl"],
@@ -182,7 +182,7 @@ GET /api/v1/engines/2
       "Column-level encryption",
       "Authentication methods (SCRAM, MD5, LDAP, etc.)"
     ]
-  },
+  
   "useCases": [
     "Web applications",
     "Data warehousing",
@@ -190,12 +190,12 @@ GET /api/v1/engines/2
     "Time-series data",
     "JSON document storage"
   ],
-  "connectionExample": {
+  "connectionExample": 
     "java": "jdbc:postgresql://host:5432/database",
     "python": "postgresql://user:password@host:5432/database",
     "nodejs": "postgres://user:password@host:5432/database"
-  }
-}
+  
+
 ```
 
 **Errores:**
@@ -205,7 +205,7 @@ GET /api/v1/engines/2
 
 ## Filtrar Motores por Categoría
 
-### GET /engines/category/{category}
+### GET /engines/category/category
 
 Obtiene motores filtrados por categoría.
 
@@ -225,19 +225,17 @@ GET /api/v1/engines/category/SQL
 {
   "category": "SQL",
   "engines": [
-    {
+    
       "id": 1,
       "name": "MySQL",
       "version": "8.0",
       "defaultPort": 3306
-    },
-    {
+    
       "id": 2,
       "name": "PostgreSQL",
       "version": "15",
       "defaultPort": 5432
     },
-    {
       "id": 5,
       "name": "SQL Server",
       "version": "2022",

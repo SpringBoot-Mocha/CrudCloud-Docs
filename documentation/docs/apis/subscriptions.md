@@ -1,6 +1,6 @@
 ---
-sidebar_position: 4
-title: Subscriptions
+title: Subscriptions API
+sidebar_label: Subscriptions
 ---
 
 # Subscriptions API
@@ -43,7 +43,7 @@ Authorization: Bearer <jwt-token>
 
 **Response (200 OK):**
 ```json
-{
+
   "id": 25,
   "userId": 10,
   "planId": 1,
@@ -56,7 +56,7 @@ Authorization: Bearer <jwt-token>
   "endDate": null,
   "createdAt": "2025-11-01T10:30:00Z",
   "updatedAt": "2025-11-10T12:00:00Z"
-}
+
 ```
 
 **Response Fields:**
@@ -92,10 +92,10 @@ POST /api/v1/subscriptions/upgrade
 Authorization: Bearer <jwt-token>
 Content-Type: application/json
 
-{
+
   "userId": 10,
   "planId": 2
-}
+
 ```
 
 **Request Body:**
@@ -107,7 +107,7 @@ Content-Type: application/json
 
 **Response (201 Created):**
 ```json
-{
+
   "id": 26,
   "userId": 10,
   "planId": 2,
@@ -121,12 +121,12 @@ Content-Type: application/json
   "createdAt": "2025-11-10T18:00:00Z",
   "updatedAt": "2025-11-10T18:00:00Z",
   "message": "Subscription upgraded successfully",
-  "previousPlan": {
+  "previousPlan": 
     "id": 25,
     "planName": "Free",
     "endDate": "2025-11-10T18:00:00Z"
-  }
-}
+  
+
 ```
 
 **Escenarios:**
@@ -146,7 +146,7 @@ Content-Type: application/json
 
 ## Obtener Suscripción por ID
 
-### GET /subscriptions/{id}
+### GET /subscriptions/id
 
 Obtiene los detalles de una suscripción específica.
 
@@ -158,7 +158,7 @@ Authorization: Bearer <jwt-token>
 
 **Response (200 OK):**
 ```json
-{
+
   "id": 26,
   "userId": 10,
   "planId": 2,
@@ -174,7 +174,7 @@ Authorization: Bearer <jwt-token>
   "billingCycle": "monthly",
   "nextBillingDate": "2025-12-10T18:00:00Z",
   "autoRenew": true
-}
+
 ```
 
 **Errores:**
@@ -207,27 +207,27 @@ Authorization: Bearer <jwt-token>
 
 **Response (200 OK):**
 ```json
-{
+
   "content": [
-    {
+    
       "id": 26,
       "planName": "Standard",
       "isActive": true,
       "startDate": "2025-11-10T18:00:00Z",
       "endDate": null
-    },
-    {
+    
+  
       "id": 25,
       "planName": "Free",
       "isActive": false,
       "startDate": "2025-11-01T00:00:00Z",
       "endDate": "2025-11-10T18:00:00Z"
-    }
+    
   ],
   "totalElements": 2,
   "totalPages": 1,
   "currentPage": 0
-}
+
 ```
 
 **Errores:**
@@ -238,7 +238,7 @@ Authorization: Bearer <jwt-token>
 
 ## Cancelar Suscripción
 
-### DELETE /subscriptions/{id}
+### DELETE /subscriptions/id
 
 Cancela una suscripción activa. El usuario volverá al plan Free.
 
@@ -250,7 +250,7 @@ Authorization: Bearer <jwt-token>
 
 **Response (200 OK):**
 ```json
-{
+
   "message": "Subscription cancelled successfully",
   "subscriptionId": 26,
   "cancelledAt": "2025-11-10T20:00:00Z",
@@ -259,13 +259,13 @@ Authorization: Bearer <jwt-token>
     "planName": "Free",
     "maxInstances": 2,
     "startDate": "2025-11-10T20:00:00Z"
-  },
-  "refundInfo": {
+  
+  "refundInfo": 
     "refundAmount": 6.66,
     "refundReason": "Prorated refund for unused period",
     "refundStatus": "PENDING"
-  }
-}
+  
+
 ```
 
 **Notas:**
@@ -284,7 +284,7 @@ Authorization: Bearer <jwt-token>
 
 ## Reactivar Suscripción
 
-### PUT /subscriptions/{id}/reactivate
+### PUT /subscriptions/id/reactivate
 
 Reactiva una suscripción cancelada previamente.
 

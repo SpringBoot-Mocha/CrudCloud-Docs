@@ -4,9 +4,9 @@ title: Introducción
 slug: /intro
 ---
 
-# Bienvenido a CrudCloud Backend
+# Bienvenido a CrudCloud
 
-**CrudCloud Backend** es una plataforma empresarial robusta y escalable para la **creación y gestión automatizada de instancias de bases de datos reales** en contenedores Docker. Desarrollado con las últimas tecnologías de Java y Spring Boot, CrudCloud permite a usuarios y organizaciones desplegar, monitorear y administrar múltiples motores de bases de datos desde una única API RESTful.
+**CrudCloud** es una plataforma empresarial robusta y escalable para la **creación y gestión automatizada de instancias de bases de datos reales** en contenedores Docker. Desarrollado con las últimas tecnologías de Java y Spring Boot, CrudCloud permite a usuarios y organizaciones desplegar, monitorear y administrar múltiples motores de bases de datos desde una única API RESTful.
 
 ## Visión General del Proyecto
 

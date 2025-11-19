@@ -6,36 +6,25 @@
 
 import {themes as prismThemes} from 'prism-react-renderer';
 
-// This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
-
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-  title: 'CrudCloud Backend',
-  tagline: 'Documentacion oficial del backend de CrudCloud',
+  title: 'CrudCloud',
+  tagline: 'Documentacion oficial de CrudCloud',
   favicon: 'img/favicon.ico',
 
-  // Future flags, see https://docusaurus.io/docs/api/docusaurus-config#future
   future: {
-    v4: true, // Improve compatibility with the upcoming Docusaurus v4
+    v4: true,
   },
 
-  // Set the production url of your site here
   url: 'https://your-docusaurus-site.example.com',
-  // Set the /<baseUrl>/ pathname under which your site is served
-  // For GitHub pages deployment, it is often '/<projectName>/'
   baseUrl: '/',
 
-  // GitHub pages deployment config.
-  // If you aren't using GitHub pages, you don't need these.
-  organizationName: 'CrudCloud', // Usually your GitHub org/user name.
-  projectName: 'crudcloud-backend', // Usually your repo name.
+  organizationName: 'CrudCloud',
+  projectName: 'crudcloud-backend',
 
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
 
-  // Even if you don't use internationalization, you can use this field to set
-  // useful metadata like html lang. For example, if your site is Chinese, you
-  // may want to replace "en" with "zh-Hans".
   i18n: {
     defaultLocale: 'es',
     locales: ['es', 'en'],
@@ -46,13 +35,13 @@ const config = {
       'classic',
       /** @type {import('@docusaurus/preset-classic').Options} */
       ({
+        // 👉 ESTE ES EL DOCS DEL BACKEND (YA EXISTENTE)
         docs: {
           sidebarPath: './sidebars.js',
           routeBasePath: 'docs',
-          // Remove edit URL for now
           editUrl: undefined,
         },
-        blog: false, // Disable blog
+        blog: false,
         theme: {
           customCss: './src/css/custom.css',
         },
@@ -60,10 +49,23 @@ const config = {
     ],
   ],
 
+  // 👉 NUEVO: plugin de docs para el FRONTEND
+  plugins: [
+    [
+      '@docusaurus/plugin-content-docs',
+      {
+        id: 'frontend',
+        path: 'frontend-docs',          // carpeta que vamos a crear
+        routeBasePath: 'frontend',      // URL base: /frontend
+        sidebarPath: './sidebarsFrontend.js',
+        editUrl: undefined,
+      },
+    ],
+  ],
+
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
-      // Replace with your project's social card
       image: 'img/crudcloud-social-card.jpg',
       colorMode: {
         defaultMode: 'light',
@@ -71,17 +73,24 @@ const config = {
         respectPrefersColorScheme: true,
       },
       navbar: {
-        title: 'CrudCloud Backend',
+        title: 'CrudCloud',
         logo: {
           alt: 'CrudCloud Logo',
           src: 'img/logo.svg',
         },
         items: [
+          // 👉 BACKEND (lo que ya tenías)
           {
             type: 'docSidebar',
             sidebarId: 'documentationSidebar',
             position: 'left',
-            label: 'Documentacion',
+            label: 'Backend',
+          },
+          // 👉 NUEVO: enlace a la doc del FRONTEND
+          {
+            to: '/frontend/intro',
+            label: 'Frontend',
+            position: 'left',
           },
           {
             type: 'localeDropdown',
